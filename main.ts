@@ -1,10 +1,10 @@
 // bring-the-humans-03 entry: a TikTok ad for make.fun.
 //
-// This program is the whole entrypoint. It takes VIDEO.json from the
-// repository root and places an identical copy at <output>/VIDEO.json,
-// which is where the house reads the video's address from. It does no
-// network access, reads no clock, and touches no file outside the repo
-// and the output directory, so two runs write the same bytes.
+// The entrypoint copies VIDEO.json from the repository root to
+// <output>/VIDEO.json, where the house reads the video's address from.
+// It does no network access, reads no clock, and touches no file
+// outside the repo and the output directory, so two runs write the
+// same bytes.
 //
 // The video itself is the entry: an original vertical ad, made in the
 // session that built this repository, showing make.fun's brand badge
@@ -28,27 +28,48 @@ const SOURCE_NAME = 'VIDEO.json';
 const sourcePath = join(BOT_DIR, SOURCE_NAME);
 const targetPath = join(OUTPUT_DIR, SOURCE_NAME);
 
-// Fail loudly instead of shipping a stale or unreadable file: the
-// submitted file must be a JSON object carrying a url string. The
-// placeholder VIDEO.json ships with this repository on purpose (the
-// gate refuses it until the real TikTok address is filled in), so the
-// url is not format-checked here: the house reads the video itself.
-let parsed;
+// A TikTok video address is https://www.tiktok.com/@<handle>/video/<id>.
+// The placeholder VIDEO.json ships with this repository on purpose (the
+// gate refuses it until the real TikTok address is filled in); once the
+// real address is in, the url must match this shape, or the house would
+// read a video that is not this entry's.
+const TIKTOK_VIDEO_URL_PATTERN = /^https:\/\/www\.tiktok\.com\/@[A-Za-z0-9._-]+\/video\/[0-9]+\/?$/;
+
+function isTikTokVideoUrl(url: string): boolean {
+  return TIKTOK_VIDEO_URL_PATTERN.test(url);
+}
+
+function fail(message: string): never {
+  console.error(message);
+  process.exit(1);
+}
+
+let parsed: unknown;
 try {
   parsed = JSON.parse(readFileSync(sourcePath, 'utf8'));
 } catch (err) {
-  console.error(`VIDEO.json could not be read from ${BOT_DIR}: ${(err as Error).message}`);
-  process.exit(1);
+  fail(`VIDEO.json could not be read from ${BOT_DIR}: ${(err as Error).message}`);
 }
-if (typeof parsed !== 'object' || parsed === null || typeof parsed.url !== 'string') {
-  console.error(`VIDEO.json in ${BOT_DIR} does not carry a url string`);
-  process.exit(1);
+if (typeof parsed !== 'object' || parsed === null || typeof (parsed as { url?: unknown }).url !== 'string') {
+  fail(`VIDEO.json in ${BOT_DIR} does not carry a url string`);
+}
+const videoUrl = (parsed as { url: string }).url;
+if (!isTikTokVideoUrl(videoUrl)) {
+  fail(`VIDEO.json in ${BOT_DIR} does not carry a TikTok video address (expected https://www.tiktok.com/@<handle>/video/<id>): ${videoUrl}`);
 }
 
 mkdirSync(OUTPUT_DIR, { recursive: true });
 try {
   copyFileSync(sourcePath, targetPath);
 } catch (err) {
-  console.error(`VIDEO.json could not be copied to ${OUTPUT_DIR}: ${(err as Error).message}`);
-  process.exit(1);
+  fail(`VIDEO.json could not be copied to ${OUTPUT_DIR}: ${(err as Error).message}`);
 }
+
+// Confirm the copy is byte-identical to the source: a partial or stale
+// file would send the house to the wrong video.
+const copiedText = readFileSync(targetPath, 'utf8');
+const sourceText = readFileSync(sourcePath, 'utf8');
+if (copiedText !== sourceText) {
+  fail(`VIDEO.json in ${OUTPUT_DIR} does not match the source in ${BOT_DIR}`);
+}
+console.log(`VIDEO.json copied to ${targetPath}: ${videoUrl}`);
