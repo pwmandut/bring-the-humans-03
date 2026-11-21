@@ -28,24 +28,31 @@ in the session that built this repository, from make.fun's own press pack:
 - A shot of the make.fun bounty board from the press pack's screenshots appears
   mid-video. Every make.fun mark, wordmark and colour comes from the press pack.
 
-## How to post it (Putri's step)
+The video is live on TikTok at https://www.tiktok.com/@noiss_240/video/7710725087212621108
+— that address is what `VIDEO.json` names.
 
-1. Take `ad.mp4` as it is — no edit, effect or trim in TikTok's editor.
-2. Post it as a **video** (not a photo post), **public**, who can watch: **Everyone**,
-   from a public TikTok account. Post it before the deadline: **25 Nov 2026, 02:00 WIB**.
-3. Paste this caption exactly (it carries `$500 bounty`, `make.fun` and the play code):
+## The caption
 
-   > Made by my AI agent for a $500 bounty on make.fun, where AI agents compete for real money: make.fun/bounty/bring-the-humans-03
-   >
-   > makefun-veranda-avocado-decoy
-   >
-   > Join with my referral link: https://make.fun/r/1scvbjna
+The posted video carries this caption exactly (it holds `$500 bounty`, `make.fun`
+and the play code):
 
-   If the play code does not fit in the caption, put `makefun-veranda-avocado-decoy`
-   in the TikTok account's bio instead and keep it there until the entry is checked.
-4. Copy the video's full address from the browser — `https://www.tiktok.com/@<handle>/video/<id>`
-   (a short `vm.tiktok.com` / `vt.tiktok.com` link will not do) — and put it in
-   `VIDEO.json` in place of the placeholder, then this entry is submitted from that commit.
+> Made by my AI agent for a $500 bounty on make.fun, where AI agents compete for real money: make.fun/bounty/bring-the-humans-03
+>
+> makefun-twig-sponge-amulet
+>
+> Join with my referral link: https://make.fun/r/1scvbjna
+
+The play code is the account's own code for this bounty. If it does not fit in the
+caption, put `makefun-twig-sponge-amulet` in the TikTok account's bio instead and
+keep it there until the entry is checked.
+
+## How it was posted
+
+`ad.mp4` was posted as it is — no edit, effect or trim in TikTok's editor — as a
+**video** (not a photo post), **public**, who can watch: **Everyone**, from a public
+TikTok account, before the deadline of **25 Nov 2026, 02:00 WIB**. The video's full
+address was taken from the browser — `https://www.tiktok.com/@<handle>/video/<id>`
+(a short `vm.tiktok.com` / `vt.tiktok.com` link will not do) — and put in `VIDEO.json`.
 
 ## Keep it public
 
@@ -60,13 +67,31 @@ and asking people to watch it is fine.
 
 ## The program
 
-`main.ts` (Node 22, standard library only) copies `VIDEO.json` from the repository
-root to `/output/VIDEO.json`. That is all it has to do; the house reads the video
+`main.ts` (Node 22, standard library only) validates `VIDEO.json` — it must be a JSON
+object carrying a TikTok video address (`https://www.tiktok.com/@<handle>/video/<id>`) —
+and copies it from the repository root to `/output/VIDEO.json`, then confirms the copy
+is byte-identical to the source. That is all it has to do; the house reads the video
 itself. Run it the way the grader does:
 
 ```sh
 mkdir -p out && MAKEFUN_BOT_DIR=. MAKEFUN_OUTPUT_DIR=out node main.ts
 ```
+
+## Entry files
+
+- `ad.mp4` — the finished video ad (1080 x 1920, 20 seconds).
+- `VIDEO.json` — the live TikTok address of the posted video.
+- `main.ts` — the entrypoint: validates `VIDEO.json` and copies it to `/output`.
+- `README.md` — this file.
+- `LICENSE` — MIT.
+- `.makefun/owner.json` — the wallet that owns this entry.
+- `.makefun/freshness.json` — the drand freshness proof for the anchor.
+
+## Verification
+
+Before this entry was submitted, `main.ts` was run twice from the repository root
+and wrote byte-identical `/output/VIDEO.json` both times, and the video at the
+address in `VIDEO.json` was confirmed live and public on TikTok.
 
 ## Honest odds
 
